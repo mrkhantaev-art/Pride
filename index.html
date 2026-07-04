@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PRIDE Seating</title>
+<style>
+body{font-family:Arial;background:#111;color:#fff;max-width:1100px;margin:auto;padding:20px}
+input,button{padding:12px;font-size:16px}
+input{width:260px}
+button{cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
+.card{background:#1d1d1d;border:1px solid #444;border-radius:10px;padding:12px}
+.row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #333}
+.big{font-size:34px;font-weight:bold;color:#d4af37}
+</style>
+</head>
+<body>
+<h1>PRIDE Poker Club</h1>
+<p>Игрок приходит → получает случайное свободное место.</p>
+<input id="name" placeholder="Имя игрока">
+<button onclick="assign()">🎲 Выдать место</button>
+<button onclick="resetSeats()">Сброс</button>
+<div id="result"></div>
+<div id="tables" class="grid"></div>
+<script>
+const KEY="pride-gh-pages-seating";
+let a=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(a));}
+function free(){
+ let s=[];
+ for(let t=1;t<=6;t++)for(let m=1;m<=10;m++){
+   if(!a.find(x=>x.table==t&&x.seat==m))s.push({table:t,seat:m});
+ }
+ return s;
+}
+function assign(){
+ let n=document.getElementById("name").value.trim();
+ if(!n)return alert("Введите имя");
+ let f=free();
+ if(!f.length)return alert("Свободных мест нет");
+ let c=f[Math.floor(Math.random()*f.length)];
+ a.push({name:n,table:c.table,seat:c.seat});
+ save();
+ document.getElementById("name").value="";
+ document.getElementById("result").innerHTML="<div class='big'>"+n+"<br>Стол "+c.table+" · Место "+c.seat+"</div>";
+ render();
+}
+function resetSeats(){
+ if(confirm("Сбросить рассадку?")){a=[];save();render();document.getElementById("result").innerHTML="";}
+}
+function render(){
+ let h="";
+ for(let t=1;t<=6;t++){
+   h+="<div class='card'><h3>Стол "+t+"</h3>";
+   for(let m=1;m<=10;m++){
+     let p=a.find(x=>x.table==t&&x.seat==m);
+     h+="<div class='row'><span>"+m+"</span><span>"+(p?p.name:"—")+"</span></div>";
+   }
+   h+="</div>";
+ }
+ document.getElementById("tables").innerHTML=h;
+}
+render();
+</script>
+</body>
+</html>
